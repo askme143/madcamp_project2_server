@@ -15,8 +15,6 @@ mongoClient.connect(databaseURL,
     }
 );
 
-
-
 const checkUser = (req, res, next) => {
     console.log("Checking user access");
     
@@ -39,11 +37,11 @@ const checkUser = (req, res, next) => {
             console.log ('find user [ ' + documents + ' ]');
             res.statusCode = 200;
             res.setHeader('Content-Type', 'text/plain');
-            res.end("success");
+            res.send("success");
         } else {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'text/plain');
-            res.end("failed");
+            res.send("failed");
         }
     })
     
@@ -66,7 +64,7 @@ const signUpUser = (req, res, next) => {
             console.log ('find user [ ' + documents + ' ]');
             res.statusCode = 200;
             res.setHeader('Content-Type', 'text/plain');
-            res.end("Already exists");
+            res.send("Already exists");
         } else {
             res.statusCode = 200;
 
@@ -76,7 +74,7 @@ const signUpUser = (req, res, next) => {
                 console.log("SginUP: Insert \n" + user.name + "\n in USERS collection successfully");
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'text/plain');
-                res.end("success");
+                res.send("success");
             })
         }
     })

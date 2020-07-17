@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 
 /* My modules */
 const apiUser = require('./routes/api/user');
+const apiContact = require('./routes/api/contact');
 
 /* Put functions in the middleware */
 /* logger */
@@ -20,5 +21,6 @@ app.use(bodyParser.json());
 // app.post('/login', apiUser.checkUser);
 app.post('/signup', apiUser.signUpUser);
 app.get('/login', apiUser.checkUser);
+app.get('/contact', apiContact.getContacts);
 
 module.exports = app;
