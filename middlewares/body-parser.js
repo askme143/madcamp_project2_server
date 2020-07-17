@@ -1,4 +1,4 @@
-const bodyParser = () => (req, res, next) => {
+const bodyParser = (req, res, next) => {
     let body = [];
 
     req.on('data', chunk => {
