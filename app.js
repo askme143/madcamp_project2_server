@@ -1,11 +1,24 @@
-const App = require('./src/Application');
-const app = App();
+const express = require('express');
+const app = express();
 
-const bodyParser = require('./middlewares/body-parser');
+/* External modules */
+const logger = require('morgan');
+const bodyParser = require('body-parser');
 
+/* My modules */
 const apiUser = require('./routes/api/user');
 
-app.use(bodyParser);
-app.post('/login', apiUser.index);
+/* Put functions in the middleware */
+/* logger */
+app.use(logger('dev'));
+
+/* Body parser */
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
+
+/* My modules */
+// app.post('/login', apiUser.checkUser);
+app.post('/signup', apiUser.signUpUser);
+app.get('/login', apiUser.checkUser);
 
 module.exports = app;
