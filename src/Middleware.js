@@ -25,6 +25,13 @@ const Middleware = () => {
             return isNextErrorMw ? nextMw(err, _req, _res, next) : _run(n + 1, err);
         }
 
+        if (nextMw._path) {
+            const pathMatched = _req.url === nextMw._path &&
+                _req.method.toLowerCase() === (nextMw._method || 'get');
+        
+            return pathMatched ? nextMw(_req, _res, next) : _run(n + 1)
+        }
+
         nextMw(_req, _res, next);
     }
 
