@@ -8,8 +8,7 @@ const multer = require('multer');
 
 /* Multer functions */
 const multerGallery = multer({
-    dest: './upload/gallery',
-    limits: {fileSize: 16 * 1024 * 1000}
+    dest: './upload/gallery'
 });
 
 /* My modules */
@@ -24,6 +23,9 @@ app.use(logger('dev'));
 /* Body parser */
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+app.post('/gallery/upload', multerGallery.single('userfile'), function(req, res, next){
+    next();
+});
 
 /* My modules */
 app.post('/signup', apiUser.signUpUser);
@@ -34,7 +36,6 @@ app.post('/contact_get', apiContact.getContacts);
 app.post('/contact_update', apiContact.putContacts);
 app.post('/contact_update', apiContact.getContacts);
 
-app.post('/gallery/upload', multerGallery);
 app.post('/gallery/upload', apiGallery.uploadImage);
 app.post('/gallery/download', apiGallery.downloadImage);
 
