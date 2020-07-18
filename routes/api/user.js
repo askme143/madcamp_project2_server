@@ -18,11 +18,7 @@ mongoClient.connect(databaseURL,
 const checkUser = (req, res, next) => {
     console.log("Checking user access");
     
-    var query = decodeURI(req.url);
-    var lastQMark = query.lastIndexOf('?');
-    var query = query.substring(lastQMark + 1);
-
-    const {fb_id, email, name} = queryStringToJSON(query);
+    const {fb_id, email, name} = req.body;
     const user = {fb_id, email, name};
 
     console.log(email);
@@ -32,20 +28,23 @@ const checkUser = (req, res, next) => {
     
     result.toArray((error, documents) => {
         if (error) {
+            console.log("Error: checkUser");
+
             throws (error);
         } else if (documents.length > 0) {
-            console.log ('find user [ ' + documents + ' ]');
+            console.log("Login success");
+
             res.statusCode = 200;
             res.setHeader('Content-Type', 'text/plain');
             res.send("success");
         } else {
+            console.log("Login failed");
+
             res.statusCode = 200;
             res.setHeader('Content-Type', 'text/plain');
             res.send("failed");
         }
     })
-    
-    console.log(user);
 };
 
 const signUpUser = (req, res, next) => {
@@ -64,7 +63,7 @@ const signUpUser = (req, res, next) => {
             console.log ('find user [ ' + documents + ' ]');
             res.statusCode = 200;
             res.setHeader('Content-Type', 'text/plain');
-            res.send("Already exists");
+            res.send("failed");
         } else {
             res.statusCode = 200;
 
