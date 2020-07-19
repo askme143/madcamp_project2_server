@@ -7,9 +7,23 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 
 /* Multer functions */
-const multerGallery = multer({
-    dest: './upload/gallery'
-});
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, './upload/gallery');
+    },
+    filename: (req, file, cb) => {
+        if (file.fieldname == 'image') {
+            cb(null, new Date().valueOf() + 'image');
+        } else if (file.fieldname == 'fb_id') {
+            cb(null, new Date().valueOf() + 'fb_id');
+        } else if (file.fieldname == 'filename') {
+            cb(null, new Date().valueOf() + 'filename');
+        } else {
+            cb(null, 'unknown');
+        }
+    }
+})
+const multerGallery = multer({ storage: storage });
 
 /* My modules */
 const apiUser = require('./routes/api/user');
@@ -23,9 +37,6 @@ app.use(logger('dev'));
 /* Body parser */
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
-app.post('/gallery/upload', multerGallery.single('userfile'), function(req, res, next){
-    next();
-});
 
 /* My modules */
 app.post('/signup', apiUser.signUpUser);
@@ -36,6 +47,10 @@ app.post('/contact_get', apiContact.getContacts);
 app.post('/contact_update', apiContact.putContacts);
 app.post('/contact_update', apiContact.getContacts);
 
+app.use('/gallery/upload', multerGallery.fields([{name: 'image'}, {name: 'fb_id'}, {name: 'filename'}]), function(req, res, next){
+    console.log(req.files)
+    next();
+});
 app.post('/gallery/upload', apiGallery.uploadImage);
 app.post('/gallery/download', apiGallery.downloadImage);
 

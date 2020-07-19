@@ -16,15 +16,13 @@ mongoClient.connect(databaseURL,
 );
 
 const checkUser = (req, res, next) => {
-    console.log("Checking user access");
+    console.log("> Checking user access");
     
-    const {fb_id, email, name} = req.body;
-    const user = {fb_id, email, name};
-
-    console.log(email);
+    const {fb_id, name} = req.body;
+    const user = {fb_id, name};
     
     var users = db.db('myDB').collection('user');
-    var result = users.find({ 'email': email, 'name': name, 'fb_id': fb_id});
+    var result = users.find({'name': name, 'fb_id': fb_id});
     
     result.toArray((error, documents) => {
         if (error) {
@@ -48,13 +46,13 @@ const checkUser = (req, res, next) => {
 };
 
 const signUpUser = (req, res, next) => {
-    console.log("Sign up process started");
+    console.log("> Sign up process started");
 
-    const {fb_id, email, name} = req.body;
-    const user = {fb_id, email, name};
+    const {fb_id, name} = req.body;
+    const user = {fb_id, name};
 
     var users = db.db('myDB').collection('user');
-    var result = users.find({'email': email, 'name': name, 'fb_id': fb_id});
+    var result = users.find({'name': name, 'fb_id': fb_id});
 
     result.toArray((error, documents) => {
         if (error) {

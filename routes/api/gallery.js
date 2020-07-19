@@ -1,3 +1,5 @@
+const { fakeServer } = require('sinon');
+
 var mongoClient = require('mongodb').MongoClient;
 
 const databaseURL = 'mongodb://localhost:27017';
@@ -15,28 +17,39 @@ mongoClient.connect(databaseURL,
     }
 );
 
+const fs = require("fs");
+
 const uploadImage = (req, res, next) => {
-    console.log("Uploading image");
+    console.log("> Uploading image");
 
-    const {fb_id, name, posix_time} = req.body;
-    const fileObject = req.file;
+    const {image, fb_id} = req.files;
 
-    if (fileObject.trucated) {
-        var error = new Error("Upload image larger than 16MB");
-        throw error;
-    }
+    const facebookID = fb_id[0].originalname;
+    const original_name = image[0].originalname;
+    const saved_name = image[0].filename;
+    const image_doc = {"fb_id": facebookID,
+                        "original_name": original_name,
+                        "saved_name" : saved_name,
+                        "posix" : new Date().valueOf() + ""};
 
-    const orgFileName = fileObject.originalname;
-    const filesize = fileObject.size;
-    const savePath = __dirname + "/upload/gallery";
+    fs.unlink(fb_id[0].path, ()=>{});
 
-    console.log(fb_id + " " + name + " " + posix_time);
-    console.log(fileObject);
-    console.log(orgFileName + " " + filesize + " " + savePath);
+    const gallery = db.db('myDB').collection('gallery');
+    gallery.insertOne(image_doc, (error, result) => {
+        if (error) throw error;
+
+        console.log("UploadImage: Upload \"" + original_name +"\"");
+        
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/plain');
+        res.send("success");
+    })
 }
 
 const downloadImage = (req, res, next) => {
-    console.log("Downloading image");
+    console.log("> Downloading image");
+
+    
 }
 
 module.exports = {
