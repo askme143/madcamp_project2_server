@@ -6,24 +6,25 @@ const logger = require('morgan');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 
-/* Multer functions */
-const storage = multer.diskStorage({
+/* Multer storages */
+const storageGalleryUpload = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, './upload/gallery');
     },
     filename: (req, file, cb) => {
         if (file.fieldname == 'image') {
             cb(null, new Date().valueOf() + 'image');
-        } else if (file.fieldname == 'fb_id') {
-            cb(null, new Date().valueOf() + 'fb_id');
-        } else if (file.fieldname == 'filename') {
-            cb(null, new Date().valueOf() + 'filename');
         } else {
-            cb(null, 'unknown');
+            cb(null, new Date().valueOf() + 'unknown');
         }
     }
 })
-const multerGallery = multer({ storage: storage });
+
+/* Multer functions */
+const multerGalleryUpload = multer({
+    storage: storageGalleryUpload,
+    limits: 16 * 1024 * 1000
+});
 
 /* My modules */
 const apiUser = require('./routes/api/user');
@@ -45,13 +46,14 @@ app.post('/login', apiUser.checkUser);
 app.post('/contact_put', apiContact.putContacts);
 app.post('/contact_get', apiContact.getContacts);
 app.post('/contact_update', apiContact.putContacts);
-app.post('/contact_update', apiContact.getContacts);
 
-app.use('/gallery/upload', multerGallery.fields([{name: 'image'}, {name: 'fb_id'}, {name: 'filename'}]), function(req, res, next){
-    console.log(req.files)
+app.use('/gallery/upload', multerGalleryUpload.single('image'), function(req, res, next){
+    console.log(req.file)
     next();
 });
 app.post('/gallery/upload', apiGallery.uploadImage);
+
 app.post('/gallery/download', apiGallery.downloadImage);
+app.post('/gallery/delete', apiGallery.deleteImage);
 
 module.exports = app;
