@@ -78,8 +78,7 @@ app.use('/post/upload', multerPostUpload.array('images', 5), function(req, res, 
     next();
 });
 app.post('/post/upload', apiPost.uploadPost);
-app.post('/post/download', apiPost.getPost);
-app.post('/post/myload',apiPost.getMyPost);
-app.post('/post/bigload',apiPost.getBigPost);
+app.post('/post/download/list', apiPost.getPost);
+app.post('/post/download/detail',apiPost.getBigPost);
 
 module.exports = app;

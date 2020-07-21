@@ -17,6 +17,9 @@ mongoClient.connect(databaseURL,
     }
 );
 
+const fs = require("fs");
+const ObjectId = require('mongodb').ObjectID;
+
 const uploadPost = (req, res, next) => {
     console.log("> Upload post");
 
@@ -39,7 +42,8 @@ const uploadPost = (req, res, next) => {
             "writer":writer,
             "like_count":like_count,
             "saved_names":saved_names,
-            "posix":Number(new Date().valueOf())};
+            "posix":Number(new Date().valueOf())
+        };
     
     const postCollection = db.db('myDB').collection('post');
 
@@ -58,15 +62,38 @@ const getPost = ( req, res, next ) => {
     const {fb_id} = req.body;
 
     var postCollection = db.db('myDB').collection('post');
-    var result=postCollection.sort({"posix" : -1});
+    var result = postCollection.find({}).sort({"posix" : -1});
 
     result.toArray((error,documents) => {
-        if (error) { throws (error);
+        if (error) {
+            throws (error);
         } else{
+            var returnJson = {}; 
+            returnJson['posts'] = [];
+            
+            for (var i = 0; i < documents.length; i++){
+                const post = {
+                    'images' : [],
+                    'name' : documents[i].name,
+                    'price' : documents[i].price,
+                    'location' : documents[i].location,
+                    'detail' : documents[i].detail,
+                    'writer' : documents[i].writer,
+                    'like_count' : documents[i].like_count,
+                    '_id' : documents[i]._id
+                }
+                console.log(documents[i]);
+                for (var j = 0; j < documents[i].saved_names.length; j++){
+                    const imageString = fs.readFileSync("/root/server_try/upload/post/" + documents[i].saved_names[j]).toString("base64");
+                    post.images.push(imageString);
+                }
+                returnJson['posts'].push(post);
+            }
+            console.log(documents);
             console.log("Get all Posts");
             res.statusCode=200;
-            res.setHeader("Content-Type","");
-            res.send({"all posts" : documents, "post_id" : db.post.ObjectId.valueOf() });
+            res.setHeader("Content-Type","application/json");
+            res.send(returnJson);
         }
     })
 }
@@ -77,41 +104,34 @@ const getBigPost = ( req, res, next ) => {
     const {fb_id, post_id} = req.body;
 
     var postCollection = db.db('myDB').collection('post');
-    var result = postCollection.findOne({"fb_id" : fb_id, "_id" : post_id});
-
-    result.toArray((error,documents)=> {
-        if (error){ throws (error);
+    postCollection.findOne({"_id" : ObjectId(post_id)}, (error, document) => {
+        if (error){ 
+            throws (error);
         } else{
-            console.log("Get Big Post");
+            const post = {
+                'images' : [],
+                'name' : document.name,
+                'price' : document.price,
+                'location' : document.location,
+                'detail' : document.detail,
+                'writer' : document.writer,
+                'like_count' : document.like_count,
+                '_id' : document._id
+            }
+            for (var i = 0; i < document.saved_names.length; i++) {
+                const imageString = fs.readFileSync("/root/server_try/upload/post/" + document.saved_names[i]).toString("base64");
+                post.images.push(imageString);
+            }
+
             res.statusCode=200;
-            res.setHeader("Content-Type","");
-            res.send({"big post" : documents});
-        } 
-    })
-}
-
-const getMyPost = (req, res, next) => {
-    console.log("> Get my posts");
-
-    const {fb_id} = req.body;
-    var postCollection = db.db('myDB').collection('post');
-
-    var result = postCollection.find({"fb_id" : fb_id}).sort({"posix" : -1})
-    
-    result.toArray((error,documents)=> {
-        if (error){ throws (error);
-        } else{
-            console.log("Get My Posts");
-            res.statusCode=200;
-            res.setHeader("Content-Type","");
-            res.send({"my posts" : documents});
-        } 
-    })
+            res.setHeader("Content-Type","application/json");
+            res.send(post);
+        }
+    });
 }
 
 module.exports = {
     uploadPost,
     getPost,
-    getBigPost,
-    getMyPost
+    getBigPost
 }
