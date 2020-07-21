@@ -100,7 +100,7 @@ const deleteImage = (req, res, next) => {
     const {fb_id, indexes}  = req.body;
 
     console.log(indexes);
-    const result = gallery.find({"fb_id" : fb_id})
+    const result = gallery.find({"fb_id" : fb_id}).sort({posix: -1});
     result.toArray((error, documents) => {
         if (error) throw error;
         console.log(documents.length);

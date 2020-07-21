@@ -80,5 +80,6 @@ app.use('/post/upload', multerPostUpload.array('images', 5), function(req, res, 
 app.post('/post/upload', apiPost.uploadPost);
 app.post('/post/download/list', apiPost.getPost);
 app.post('/post/download/detail',apiPost.getBigPost);
+app.post('/post/like', apiPost.changeLike);
 
 module.exports = app;

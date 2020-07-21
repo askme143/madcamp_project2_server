@@ -116,6 +116,7 @@ const getBigPost = ( req, res, next ) => {
                 'detail' : document.detail,
                 'writer' : document.writer,
                 'like_count' : document.like_count,
+                'liked' : "false",
                 '_id' : document._id
             }
             for (var i = 0; i < document.saved_names.length; i++) {
@@ -130,8 +131,56 @@ const getBigPost = ( req, res, next ) => {
     });
 }
 
+const changeLike = (req, res, next) => {
+    console.log("> Change likes ");
+
+    const {fb_id, post_id} = req.body;
+    const like_post = {fb_id, post_id};
+
+    var postCollection = db.db('myDB').collection('post');
+    var likeCollection = db.db('myDB').collection('like_post');
+    likeCollection.findOne({"post_id" : post_id, "fb_id": fb_id}, (error, document) => {
+        if (error) throw error;
+
+        if (document == null) {
+            console.log("Increase");
+            likeCollection.insertOne(like_post, (error, result) => {
+                if (error) throw error;
+                likeCollection.find({"post_id": post_id}).toArray((error, documents) => {
+                    if (error) throw error;
+                    var like_count = documents.length;
+
+                    postCollection.updateOne({"_id": ObjectId(post_id)}, {$set: {"like_count": like_count}}, (error, result) => {
+                        if (error) throw error;
+                        
+                        res.statusCode = 200;
+                        res.send("increase");
+                    });
+                });
+            });
+        } else {
+            console.log("Decrease");
+            likeCollection.deleteOne({"fb_id": fb_id, "post_id": post_id}, (error, result) => {
+                if (error) throw error;
+                likeCollection.find({"post_id": post_id}).toArray((error, documents) => {
+                    if (error) throw error;
+                    var like_count = documents.length;
+
+                    postCollection.updateOne({"_id": ObjectId(post_id)}, {$set: {"like_count": like_count}}, (error, result) => {
+                        if (error) throw error;
+                        
+                        res.statusCode = 200;
+                        res.send("decrease");
+                    });
+                });
+            });
+        }
+    });
+}
+
 module.exports = {
     uploadPost,
     getPost,
-    getBigPost
+    getBigPost,
+    changeLike
 }
