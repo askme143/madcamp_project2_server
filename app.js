@@ -19,17 +19,34 @@ const storageGalleryUpload = multer.diskStorage({
         }
     }
 })
+const storagePostUpload = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, './upload/post');
+    },
+    filename: (req, file, cb) => {
+        if (file.fieldname == 'images') {
+            cb(null, new Date().valueOf() + 'image');
+        } else {
+            cb(null, new Date().valueOf() + 'unknown');
+        }
+    }
+})
 
 /* Multer functions */
 const multerGalleryUpload = multer({
     storage: storageGalleryUpload,
     limits: 16 * 1024 * 1000
 });
+const multerPostUpload = multer({
+    storage: storagePostUpload,
+    limits: 16 * 1024 * 1000
+})
 
 /* My modules */
 const apiUser = require('./routes/api/user');
 const apiContact = require('./routes/api/contact');
 const apiGallery = require('./routes/api/gallery');
+const apiPost = require('./routes/api/post');
 
 /* Put functions in the middleware */
 /* logger */
@@ -55,5 +72,14 @@ app.post('/gallery/upload', apiGallery.uploadImage);
 
 app.post('/gallery/download', apiGallery.downloadImage);
 app.post('/gallery/delete', apiGallery.deleteImage);
+
+app.use('/post/upload', multerPostUpload.array('images', 5), function(req, res, next){
+    console.log(req.file)
+    next();
+});
+app.post('/post/upload', apiPost.uploadPost);
+app.post('/post/download', apiPost.getPost);
+app.post('/post/myload',apiPost.getMyPost);
+app.post('/post/bigload',apiPost.getBigPost);
 
 module.exports = app;
